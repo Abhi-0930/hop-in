@@ -7,7 +7,9 @@ export default function ParentDashboard() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-slate-900 text-white px-4 py-4 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-bold">Hop-In</h1>
+        <h1 className="text-xl font-bold">
+          <Link to="/" className="hover:opacity-90">Hop-In</Link>
+        </h1>
         <div className="flex items-center gap-4">
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-sky-500">Parent</span>
           <span className="text-slate-400 text-sm">{userProfile?.name}</span>
@@ -23,6 +25,12 @@ export default function ParentDashboard() {
       <main className="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
         <section className="bg-white rounded-xl p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">My Children</h2>
+          <Link
+            to="/search"
+            className="inline-block mb-4 px-4 py-2 border border-sky-500 text-sky-500 hover:bg-sky-50 font-medium rounded-lg transition"
+          >
+            Find Van
+          </Link>
           <div className="py-12 text-center text-slate-500">
             <p>No children added yet.</p>
             <p className="text-sm mt-1">Add your children to start booking van services.</p>

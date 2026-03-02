@@ -6,9 +6,14 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import CompleteProfile from './pages/CompleteProfile'
 import Unauthorized from './pages/Unauthorized'
+import Landing from './pages/Landing'
 import ParentDashboard from './pages/ParentDashboard'
 import DriverDashboard from './pages/DriverDashboard'
 import AdminDashboard from './pages/AdminDashboard'
+import SchoolVans from './pages/SchoolVans'
+import VanDetail from './pages/VanDetail'
+import Booking from './pages/Booking'
+import AddChild from './pages/AddChild'
 
 export default function App() {
   return (
@@ -16,10 +21,19 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/schools/:schoolId/vans" element={<SchoolVans />} />
+          <Route path="/van/:vanId" element={<VanDetail />} />
+          <Route path="/van/:vanId/book" element={<Booking />} />
+          <Route path="/parent/children/add" element={
+            <ProtectedRoute allowedRoles={['parent']}>
+              <AddChild />
+            </ProtectedRoute>
+          } />
           <Route
             path="/parent/*"
             element={
