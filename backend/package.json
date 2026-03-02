@@ -1,0 +1,14 @@
+{
+  "name": "hop-in-backend",
+  "version": "0.1.0",
+  "description": "Hop-In Firebase Cloud Functions & backend services",
+  "private": true,
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "deploy": "firebase deploy --only functions"
+  },
+  "engines": {
+    "node": "18"
+  }
+}
