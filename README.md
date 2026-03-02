@@ -34,3 +34,9 @@ npm run dev
 
 - **Frontend:** React, Vite, Tailwind CSS, React Router, Firebase
 - **Backend:** Firebase (Auth, Firestore, Storage, Cloud Functions)
+
+## Security
+
+- **Firestore rules:** `firestore.rules` — Deploy with `firebase deploy --only firestore`
+- **Storage rules:** `storage.rules` — Deploy with `firebase deploy --only storage`
+- **Audit:** See `SECURITY-AUDIT.md` for full security review

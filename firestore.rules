@@ -1,0 +1,91 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper: get current user's role from users collection
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserDoc().data.role == 'admin';
+    }
+    function isDriver() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserDoc().data.role == 'driver';
+    }
+    function isParent() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserDoc().data.role == 'parent';
+    }
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Users: own data only. Admin can update verification fields.
+    match /users/{userId} {
+      allow read, create, delete: if request.auth.uid == userId;
+      allow update: if request.auth.uid == userId 
+        || (isAdmin() && 
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['verificationStatus', 'aadhaarVerified']));
+    }
+    
+    // Schools: read by all (for landing search), write by admin only
+    match /schools/{schoolId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Vans: read by authenticated, write by driver (own van) or admin
+    match /vans/{vanId} {
+      allow read: if isAuthenticated();
+      allow create: if (isDriver() && request.resource.data.driverId == request.auth.uid) || isAdmin();
+      allow update: if (isDriver() && resource.data.driverId == request.auth.uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Bookings: parents create for themselves, read own or driver's
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() && (
+        resource.data.parentId == request.auth.uid || 
+        resource.data.driverId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isParent() && request.resource.data.parentId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+    
+    // Reviews: parents create, all read, admin moderate
+    match /reviews/{reviewId} {
+      allow read: if isAuthenticated();
+      allow create: if isParent() && request.resource.data.parentId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+    
+    // Attendance: drivers create for their van, parents read own children's
+    match /attendance/{attendanceId} {
+      allow read: if isAuthenticated();
+      allow create: if isDriver();
+      allow update: if isDriver() || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Emergency alerts: parent/driver create, admin read/update
+    match /emergencyAlerts/{alertId} {
+      allow read: if isAuthenticated();
+      allow create: if isParent() || isDriver();
+      allow update: if isAdmin() || resource.data.reportedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+    
+    // Driver locations: driver writes own, parents read (via driverId in booking)
+    match /driverLocations/{driverId} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.uid == driverId;
+    }
+  }
+}

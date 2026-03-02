@@ -52,6 +52,11 @@ export default function Booking() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!childId || !van) return
+    const childBelongsToParent = userProfile?.children?.some((c) => c.childId === childId)
+    if (!childBelongsToParent) {
+      alert('Invalid child selection')
+      return
+    }
     setSubmitting(true)
     try {
       const bookingRef = await addDoc(collection(db, 'bookings'), {
