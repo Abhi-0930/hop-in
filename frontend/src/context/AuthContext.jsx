@@ -14,10 +14,12 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [connectionError, setConnectionError] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser)
+      setConnectionError(false)
       if (firebaseUser) {
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
@@ -25,6 +27,10 @@ export function AuthProvider({ children }) {
         } catch (err) {
           console.error('Error fetching user profile:', err)
           setUserProfile(null)
+          const isOffline = err?.code === 'unavailable' || 
+            err?.message?.toLowerCase?.().includes('offline') ||
+            err?.message?.toLowerCase?.().includes('blocked')
+          if (isOffline) setConnectionError(true)
         }
       } else {
         setUserProfile(null)
@@ -48,6 +54,8 @@ export function AuthProvider({ children }) {
     user,
     userProfile,
     loading,
+    connectionError,
+    setConnectionError,
     signIn,
     signUp,
     signOut,

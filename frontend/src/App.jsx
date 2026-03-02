@@ -16,10 +16,12 @@ import Booking from './pages/Booking'
 import AddChild from './pages/AddChild'
 import QRScanner from './pages/QRScanner'
 import DriverProfileSetup from './pages/DriverProfileSetup'
+import ConnectionError from './components/ConnectionError'
 
 export default function App() {
   return (
     <AuthProvider>
+      <ConnectionError />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />

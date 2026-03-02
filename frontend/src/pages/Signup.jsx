@@ -57,7 +57,16 @@ export default function Signup() {
       await refreshProfile()
       navigate(`/${data.role}`, { replace: true })
     } catch (err) {
-      setError(err.message || 'Failed to create account')
+      const code = err?.code || ''
+      if (code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Use a different email or sign in instead.')
+      } else if (code === 'auth/weak-password') {
+        setError('Password is too weak. Use at least 6 characters.')
+      } else if (code === 'auth/invalid-email') {
+        setError('Invalid email address.')
+      } else {
+        setError(err.message || 'Failed to create account')
+      }
     }
   }
 

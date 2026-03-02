@@ -1,0 +1,11 @@
+{
+  "name": "hop-in",
+  "private": true,
+  "scripts": {
+    "emulators": "firebase emulators:start",
+    "emulators:export": "firebase emulators:export ./emulator-data"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.0.0"
+  }
+}

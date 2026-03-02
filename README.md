@@ -13,7 +13,7 @@ hop-in/
 
 ## Quick Start
 
-### Frontend
+### Option A: Normal (when Firebase is not blocked)
 
 ```bash
 cd frontend
@@ -21,6 +21,10 @@ npm install
 cp .env.example .env   # Add your Firebase config to .env
 npm run dev
 ```
+
+### Option B: Emulators (when network blocks Firebase)
+
+See **EMULATOR-SETUP.md** — run Auth, Firestore, Storage locally.
 
 ### Firebase Setup
 
