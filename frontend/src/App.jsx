@@ -15,6 +15,7 @@ import VanDetail from './pages/VanDetail'
 import Booking from './pages/Booking'
 import AddChild from './pages/AddChild'
 import QRScanner from './pages/QRScanner'
+import DriverProfileSetup from './pages/DriverProfileSetup'
 
 export default function App() {
   return (
@@ -43,6 +44,11 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/driver/complete-profile" element={
+            <ProtectedRoute allowedRoles={['driver']}>
+              <DriverProfileSetup />
+            </ProtectedRoute>
+          } />
           <Route path="/driver/scan" element={
             <ProtectedRoute allowedRoles={['driver']}>
               <QRScanner />

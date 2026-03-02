@@ -5,6 +5,7 @@ import { db } from '../config/firebase'
 import { useAuth } from '../context/AuthContext'
 import { MapContainer, TileLayer, Polyline, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import ReviewsSection from '../components/ReviewsSection'
 
 function MapFitBounds({ route }) {
   const map = useMap()
@@ -38,7 +39,7 @@ export default function VanDetail() {
         setVan(vanData)
 
         const driverDoc = await getDoc(doc(db, 'users', vanData.driverId))
-        setDriver(driverDoc.exists() ? driverDoc.data() : null)
+        setDriver(driverDoc.exists() ? { id: driverDoc.id, ...driverDoc.data() } : null)
 
         const schoolDoc = await getDoc(doc(db, 'schools', vanData.schoolId))
         setSchool(schoolDoc.exists() ? schoolDoc.data() : null)
@@ -135,6 +136,10 @@ export default function VanDetail() {
             {van?.currentVacancy} of {van?.capacity} seats available
           </p>
         </div>
+
+        {driver?.id && (
+          <ReviewsSection driverId={driver.id} vanId={vanId} />
+        )}
 
         <button
           onClick={handleBook}

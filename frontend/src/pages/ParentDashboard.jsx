@@ -6,6 +6,7 @@ import { db } from '../config/firebase'
 import ChildQRCard from '../components/ChildQRCard'
 import LiveMap from '../components/LiveMap'
 import EmergencyAlert from '../components/EmergencyAlert'
+import { exportAttendanceToCSV } from '../utils/exportAttendance'
 
 export default function ParentDashboard() {
   const { userProfile, signOut } = useAuth()
@@ -156,23 +157,40 @@ export default function ParentDashboard() {
         </section>
 
         <section className="bg-white rounded-xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Attendance History</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">Attendance History</h2>
+            {attendance.length > 0 && (
+              <button
+                onClick={() => exportAttendanceToCSV(attendance, children)}
+                className="text-sm px-3 py-1 border border-slate-300 rounded-lg hover:bg-slate-50"
+              >
+                Export CSV
+              </button>
+            )}
+          </div>
           {attendance.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-slate-500 border-b">
                     <th className="pb-2">Date</th>
-                    <th className="pb-2">Boarding Time</th>
+                    <th className="pb-2">Child</th>
+                    <th className="pb-2">Boarding</th>
+                    <th className="pb-2">School Arrival</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {attendance.slice(0, 10).map((a) => (
-                    <tr key={a.id} className="border-b border-slate-100">
-                      <td className="py-2">{a.date?.toDate?.()?.toLocaleDateString() || '—'}</td>
-                      <td className="py-2">{a.boardingTime?.toDate?.()?.toLocaleTimeString() || '—'}</td>
-                    </tr>
-                  ))}
+                  {attendance.slice(0, 20).map((a) => {
+                    const child = children.find((c) => c.childId === a.childId)
+                    return (
+                      <tr key={a.id} className="border-b border-slate-100">
+                        <td className="py-2">{a.date?.toDate?.()?.toLocaleDateString() || '—'}</td>
+                        <td className="py-2">{child?.name || a.childName || '—'}</td>
+                        <td className="py-2">{a.boardingTime?.toDate?.()?.toLocaleTimeString() || '—'}</td>
+                        <td className="py-2">{a.schoolArrivalTime?.toDate?.()?.toLocaleTimeString() || '—'}</td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

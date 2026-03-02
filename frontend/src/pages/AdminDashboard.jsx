@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { collection, getDocs, doc, updateDoc, query, where } from 'firebase/firestore'
+import { collection, getDocs, doc, updateDoc, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '../config/firebase'
 import { seedAll } from '../utils/seedData'
 
@@ -8,6 +8,7 @@ export default function AdminDashboard() {
   const { userProfile, signOut } = useAuth()
   const [pendingDrivers, setPendingDrivers] = useState([])
   const [stats, setStats] = useState({ vans: 0, bookings: 0, verified: 0 })
+  const [emergencyAlerts, setEmergencyAlerts] = useState([])
   const [loading, setLoading] = useState(true)
   const [seeding, setSeeding] = useState(false)
 
@@ -40,6 +41,16 @@ export default function AdminDashboard() {
     fetch()
   }, [])
 
+  useEffect(() => {
+    const unsub = onSnapshot(
+      query(collection(db, 'emergencyAlerts'), where('status', '==', 'open')),
+      (snap) => {
+        setEmergencyAlerts(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+      }
+    )
+    return () => unsub()
+  }, [])
+
   const handleVerify = async (driverId, status) => {
     try {
       await updateDoc(doc(db, 'users', driverId), {
@@ -51,6 +62,15 @@ export default function AdminDashboard() {
         ...s,
         verified: s.verified + (status === 'approved' ? 1 : 0),
       }))
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleResolveAlert = async (alertId) => {
+    try {
+      await updateDoc(doc(db, 'emergencyAlerts', alertId), { status: 'resolved' })
+      setEmergencyAlerts((prev) => prev.filter((a) => a.id !== alertId))
     } catch (err) {
       console.error(err)
     }
@@ -101,8 +121,10 @@ export default function AdminDashboard() {
               <span className="block text-xl font-bold text-slate-900">{pendingDrivers.length}</span>
               <span className="text-xs text-slate-500">Pending Verifications</span>
             </div>
-            <div className="bg-slate-100 rounded-lg px-4 py-3 text-center">
-              <span className="block text-xl font-bold text-slate-900">0</span>
+            <div className={`rounded-lg px-4 py-3 text-center ${emergencyAlerts.length > 0 ? 'bg-red-100' : 'bg-slate-100'}`}>
+              <span className={`block text-xl font-bold ${emergencyAlerts.length > 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                {emergencyAlerts.length}
+              </span>
               <span className="text-xs text-slate-500">Active Emergency Alerts</span>
             </div>
             <div className="bg-slate-100 rounded-lg px-4 py-3 text-center">
@@ -111,6 +133,34 @@ export default function AdminDashboard() {
             </div>
           </div>
         </section>
+
+        {emergencyAlerts.length > 0 && (
+          <section className="bg-white rounded-xl p-6 shadow-sm border-2 border-red-200">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              Emergency Alerts
+            </h2>
+            <div className="space-y-4">
+              {emergencyAlerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  className="p-4 bg-red-50 rounded-lg border border-red-200"
+                >
+                  <p className="font-medium text-slate-900">{alert.description}</p>
+                  <p className="text-slate-500 text-sm mt-1">
+                    Reported by {alert.role} • {alert.timestamp?.toDate?.()?.toLocaleString() || '—'}
+                  </p>
+                  <button
+                    onClick={() => handleResolveAlert(alert.id)}
+                    className="mt-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium rounded-lg"
+                  >
+                    Mark Resolved
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="bg-white rounded-xl p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">Driver Verification Requests</h2>
