@@ -14,6 +14,7 @@ import SchoolVans from './pages/SchoolVans'
 import VanDetail from './pages/VanDetail'
 import Booking from './pages/Booking'
 import AddChild from './pages/AddChild'
+import QRScanner from './pages/QRScanner'
 
 export default function App() {
   return (
@@ -42,6 +43,11 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/driver/scan" element={
+            <ProtectedRoute allowedRoles={['driver']}>
+              <QRScanner />
+            </ProtectedRoute>
+          } />
           <Route
             path="/driver"
             element={
